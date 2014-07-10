@@ -1,0 +1,10 @@
+<ul>
+    <li data-ng-click="setStateToLeaderboard()">Leaderboard</li>
+    <li data-ng-click="setStateToNewGame()">Log New Game</li>
+    <li data-ng-click="setStateToLatestGames()">Latest Games</li>
+    <li data-ng-click="setStateToNewPlayer()">Register New Player</li>
+</ul>
+<div data-leaderboard data-ng-show="isInLeaderboardState()"></div>
+<div data-new-game data-ng-show="isInNewGameState()"></div>
+<div data-latest-games data-ng-show="isInLatestGamesState()"></div>
+<div data-new-player data-ng-show="isInNewPlayerState()"></div>
