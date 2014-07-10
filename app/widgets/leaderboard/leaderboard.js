@@ -6,7 +6,8 @@
     app.directive('leaderboard',function() {
         return {
             restrict: 'A',
-            templateUrl: 'widgets/leaderboard/leaderboard.html'
+            templateUrl: 'widgets/leaderboard/leaderboard.html',
+            controller: 'leaderboardController'
         };
     });
 

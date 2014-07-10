@@ -1,0 +1,22 @@
+{
+  "name": "jtfl",
+  "version": "0.0.0",
+  "authors": [
+    "Dominik Kukacka <dominik.kukacka@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "foundation": "~5.3.0",
+    "restangular": "~1.4.0",
+    "angular": "~1.2.19",
+    "angular-route": "~1.2.19"
+  }
+}

@@ -9,7 +9,11 @@
     'use strict';
 
     // Angular app initialization.
-    var app = angular.module('jtfl', []);
+    var app = angular.module('jtfl', ['restangular', 'angucomplete']);
+
+    app.config(function(RestangularProvider) {
+        RestangularProvider.setBaseUrl('/api/v1');
+    });
 
     app.constant('appState', {
         LEADERBOARD: 'leaderboard',

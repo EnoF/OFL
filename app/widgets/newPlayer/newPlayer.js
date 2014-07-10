@@ -6,7 +6,8 @@
     app.directive('newPlayer',function() {
         return {
             restrict: 'A',
-            templateUrl: 'widgets/newPlayer/newPlayer.html'
+            templateUrl: 'widgets/newPlayer/newPlayer.html',
+            controller: 'newPlayerController'
         };
     });
 
