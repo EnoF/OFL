@@ -1,7 +1,7 @@
 var express = require('express'),
     bodyParser = require('body-parser')
     app = express(),
-    mysql = require('mysql'),    
+    mysql = require('mysql'),
     connectionpool = mysql.createPool({
 	host : 'localhost',
 	user : 'root',
@@ -10,6 +10,7 @@ var express = require('express'),
     });
 
 app.use(bodyParser.json());
+app.use(express.static(__dirname + '/app'));
 
 app.get('/players', function(req,res){
 	connectionpool.getConnection(function(err, connection) {
@@ -39,7 +40,7 @@ app.get('/players', function(req,res){
 				});
 				connection.release();
 			});
-				
+
 		}
 	});
 //	res.send('Test');
@@ -196,7 +197,7 @@ app.put('/games/:id', function(req,res){
                                 	        });
 
 					}
-					
+
 				}
 
 			});
@@ -224,7 +225,7 @@ app.put('/games/:id', function(req,res){
                 }
         });
 });
- 
+
 
 app.listen(3000);
 console.log('API Fuck yeah!');
