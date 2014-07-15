@@ -167,7 +167,7 @@ app.put('/games/:id', function(req,res){
                                         });
                                 } else {
 					console.log(result[0])
-					if (result[0].Finished===0){
+					if (result[0]!==undefined && result[0].Finished===0){
 			                        var post={
         			                        Goals_Team1:req.body.GT1,
                          			      	Goals_Team2:req.body.GT2,
