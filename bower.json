@@ -14,9 +14,7 @@
     "tests"
   ],
   "dependencies": {
-    "foundation": "~5.3.0",
-    "restangular": "~1.4.0",
-    "angular": "~1.2.19",
-    "angular-route": "~1.2.19"
+    "angular-touch": "1.2.7",
+    "angucomplete": "*"
   }
 }
