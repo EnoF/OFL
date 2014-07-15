@@ -42,7 +42,7 @@
 
 
         Restangular.all('players').getList()
-        .then(function(users) {
+        .then(function(players) {
             $scope.players = players;
         }, function() {
 

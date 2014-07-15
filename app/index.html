@@ -6,7 +6,26 @@
     <body>
 
         <div data-ng-app="jtfl">
-            <div data-bootstrapper></div>
+            <nav class="top-bar" data-topbar>
+                <ul class="title-area">
+                    <li class="name">
+                        <h1><a href="/#/">JTFL</a>
+                        </h1>
+                    </li>
+                </ul>
+
+                <section class="top-bar-section">
+                    <!-- Left Nav Section -->
+                    <ul class="left">
+                        <li><a href="/#/">Leaderboard</a></li>
+                        <li><a href="/#/newGame">Log New Game</a></li>
+                        <li><a href="/#/latestGame">Latest Games</a></li>
+                        <li><a href="/#/newPlayer">Register New Player</a></li>
+                    </ul>
+                </section>
+            </nav>
+
+            <div ng-view style="margin-top: 45px;"></div>
         </div>
 
 
@@ -18,20 +37,9 @@
         <script type="text/javascript" src="bower_components/angucomplete/angucomplete.js"></script>
 
         <script type="text/javascript" src="app.js"></script>
-
-        <script type="text/javascript" src="widgets/bootstrapper/bootstrapper.js"></script>
-        <script type="text/javascript" src="controller/bootstrapperController.js"></script>
-
-        <script type="text/javascript" src="widgets/leaderboard/leaderboard.js"></script>
         <script type="text/javascript" src="controller/leaderboardController.js"></script>
-
-        <script type="text/javascript" src="widgets/newGame/newGame.js"></script>
         <script type="text/javascript" src="controller/newGameController.js"></script>
-
-        <script type="text/javascript" src="widgets/latestGames/latestGames.js"></script>
         <script type="text/javascript" src="controller/latestGamesController.js"></script>
-
-        <script type="text/javascript" src="widgets/newPlayer/newPlayer.js"></script>
         <script type="text/javascript" src="controller/newPlayerController.js"></script>
 
     </body>
