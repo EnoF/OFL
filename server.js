@@ -1,13 +1,9 @@
-var express = require('express'),
-    bodyParser = require('body-parser')
+var config = require('./config.js'),
+    express = require('express'),
+    bodyParser = require('body-parser'),
     app = express(),
     mysql = require('mysql'),
-    connectionpool = mysql.createPool({
-        host: '127.0.0.1',
-        user: 'root',
-        password: 'jumio100!',
-        database: 'TFL'
-    });
+    connectionpool = mysql.createPool(config.mysql);
 
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/app'));
