@@ -1,1 +1,14 @@
-NEW PLAYER
+<div data-ng-hide="matchStarted">
+    <div class="row">
+        <div class="large-12 columns">
+            <label>Name
+                <input data-ng-model="player.name" type="text" placeholder="Insert name..." />
+            </label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="large-12 columns">
+            <button data-ng-click="save(player)">Create</button>
+        </div>
+    </div>
+</div>

@@ -3,7 +3,7 @@
 
     var app = angular.module('jtfl');
 
-    app.controller('newGameController', function($scope, appState) {
+    app.controller('newGameController', function($scope) {
         $scope.people = [
             {name: "Dominik", id: 1},
             {name: "Stefan", id: 2},

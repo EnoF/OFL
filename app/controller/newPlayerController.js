@@ -3,7 +3,29 @@
 
     var app = angular.module('jtfl');
 
-    app.controller('newPlayerController', function($scope, appState) {
+    app.controller('newPlayerController', function($scope, Restangular) {
+
+        $scope.player = {
+            id: null,
+            name: null
+        };
+
+        $scope.save = function save(player) {
+            $scope.player = angular.copy(player);
+
+            Restangular.all('players')
+                .post( $scope.player )
+                .then(function(player) {
+                    $location.path( "/players/" );
+                    console.warn("success",player);
+                })
+                .then(null, function(player) {
+                    console.warn("error",player);
+                })
+            ;
+
+        };
+
     });
 
 }(window.angular));

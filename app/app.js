@@ -10,12 +10,16 @@
 
     // Angular app initialization.
     var app = angular.module('jtfl', ['restangular', 'angucomplete', 'ngRoute']);
+    app.value('apiPort', '3000');
 
-    app.config(function(RestangularProvider) {
-        RestangularProvider.setBaseUrl('/api/v1');
-    });
+    app.config(function($routeProvider, RestangularProvider) {
+          // $location.protocol() = {{$location.protocol()}}<br>
+          // $location.host() = {{$location.host()}}<br>
+          // $location.port() = {{$location.port()}}<br>
+          // $location.path() = {{$location.path()}}<br>
+          // $location.search() = {{$location.search()}}<br>
+          // $location.hash() = {{$location.hash()}}<br>
 
-    app.config(function($routeProvider) {
         $routeProvider
             .when('/', {
                 templateUrl : 'views/leaderboard.html',
@@ -37,14 +41,11 @@
                 controller  : 'newPlayerController'
             })
         ;
+
+
     });
 
-
-    app.constant('appState', {
-        LEADERBOARD: 'leaderboard',
-        NEW_GAME: 'newGame',
-        LATEST_GAMES: 'latestGames',
-        NEW_PLAYER: 'newPlayer'
+    app.run(function(Restangular, $location, apiPort) {
+        Restangular.setBaseUrl($location.protocol() + '://' + $location.host() + ':' + apiPort);
     });
-
 }(window.angular));
