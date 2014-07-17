@@ -12,10 +12,10 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="player in players | orderBy: order : reverse">
-                    <td>{{ player.rank }}</td>
-                    <td>{{ player.name }}</td>
+                    <td>{{ player.id }}</td>
+                    <td>{{ player.firstname }} {{ player.lastname }}</td>
                     <td>{{ player.points}}</td>
-                    <td>{{ player.wins}}</td>
+                    <td>{{ player.victories}}</td>
                     <td>{{ player.defeats}}</td>
                 </tr>
             </tbody>

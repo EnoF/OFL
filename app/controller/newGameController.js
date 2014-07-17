@@ -3,7 +3,7 @@
 
     var app = angular.module('jtfl');
 
-    app.controller('newGameController', function($scope) {
+    app.controller('newGameController', function($scope, Restangular) {
         $scope.people = [
             {name: "Dominik", id: 1},
             {name: "Stefan", id: 2},
@@ -13,28 +13,47 @@
 
         $scope.matchStarted = false;
         $scope.startMatch = function startMatch() {
-            $scope.matchStarted = true;
+
+            var teams = { team1: [], team2: [] };
+            ['team1', 'team2'].forEach(function(team) {
+                for (var i = $scope.teams[team].players.length - 1; i >= 0; i--) {
+                    var player = $scope.teams[team].players[i].originalObject;
+                    teams[team].push(player);
+                };
+            });
+
+            Restangular.all('games')
+                .post( teams )
+                .then(function(data) {
+                    // $location.path( "/games/" );
+                    console.warn("success",data);
+                    $scope.matchStarted = true;
+                })
+                .then(null, function(data) {
+                    console.warn("error",data);
+                })
+            ;
         };
 
         $scope.finishMatch = function finishMatch() {
             var won;
-            if($scope.teams.home.points > $scope.teams.away.points) {
-                won = 'Home';
+            if($scope.teams.team1.points > $scope.teams.team2.points) {
+                won = 'team1';
             } else {
-                won = 'Away';
+                won = 'team2';
             }
-            alert(won + ' won with ' + $scope.teams.home.points + ':' + $scope.teams.away.points);
+            alert(won + ' won with ' + $scope.teams.team1.points + ':' + $scope.teams.team2.points);
         };
 
         $scope.teams = {
-            home: {
+            team1: {
                 points: 0,
                 players: [
                     {},
                     {}
                 ],
             },
-            away: {
+            team2: {
                 points: 0,
                 players: [
                     {},

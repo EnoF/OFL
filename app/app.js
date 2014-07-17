@@ -13,12 +13,6 @@
     app.value('apiPort', '3000');
 
     app.config(function($routeProvider, RestangularProvider) {
-          // $location.protocol() = {{$location.protocol()}}<br>
-          // $location.host() = {{$location.host()}}<br>
-          // $location.port() = {{$location.port()}}<br>
-          // $location.path() = {{$location.path()}}<br>
-          // $location.search() = {{$location.search()}}<br>
-          // $location.hash() = {{$location.hash()}}<br>
 
         $routeProvider
             .when('/', {
@@ -42,10 +36,10 @@
             })
         ;
 
-
     });
 
     app.run(function(Restangular, $location, apiPort) {
         Restangular.setBaseUrl($location.protocol() + '://' + $location.host() + ':' + apiPort);
     });
+
 }(window.angular));

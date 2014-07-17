@@ -6,7 +6,7 @@
                     angucomplete
                     placeholder="Search people"
                     pause="300"
-                    selectedobject="teams.home.players[0]"
+                    selectedobject="teams.team1.players[0]"
                     localdata="people"
                     searchfields="name"
                     titlefield="name"
@@ -19,7 +19,7 @@
                     angucomplete
                     placeholder="Search people"
                     pause="300"
-                    selectedobject="teams.home.players[1]"
+                    selectedobject="teams.team1.players[1]"
                     localdata="people"
                     searchfields="name"
                     titlefield="name"
@@ -36,7 +36,7 @@
                     angucomplete
                     placeholder="Search people"
                     pause="300"
-                    selectedobject="teams.away.players[0]"
+                    selectedobject="teams.team2.players[0]"
                     localdata="people"
                     searchfields="name"
                     titlefield="name"
@@ -49,7 +49,7 @@
                     angucomplete
                     placeholder="Search people"
                     pause="300"
-                    selectedobject="teams.away.players[1]"
+                    selectedobject="teams.team2.players[1]"
                     localdata="people"
                     searchfields="name"
                     titlefield="name"
@@ -67,20 +67,20 @@
 <div data-ng-show="matchStarted">
     <div class="row">
         <div class="column large-5" style="text-align: center;">
-            {{ teams.home.players[0].originalObject.id }} - {{ teams.home.players[0].originalObject.name }}<br />
-            {{ teams.home.players[1].originalObject.id }} - {{ teams.home.players[1].originalObject.name }}
+            {{ teams.team1.players[0].originalObject.id }} - {{ teams.team1.players[0].originalObject.name }}<br />
+            {{ teams.team1.players[1].originalObject.id }} - {{ teams.team1.players[1].originalObject.name }}
         </div>
         <div class="column large-2" style="line-height: 100px; text-align: center;">
             V.S.
         </div>
         <div class="column large-5" style="text-align: center;">
-            {{ teams.away.players[0].originalObject.id }} - {{ teams.away.players[0].originalObject.name }}<br />
-            {{ teams.away.players[1].originalObject.id }} - {{ teams.away.players[1].originalObject.name }}<br />
+            {{ teams.team2.players[0].originalObject.id }} - {{ teams.team2.players[0].originalObject.name }}<br />
+            {{ teams.team2.players[1].originalObject.id }} - {{ teams.team2.players[1].originalObject.name }}<br />
         </div>
     </div>
     <div class="row">
         <div class="column large-5" style="text-align: center;">
-            <select data-ng-model="teams.home.points">
+            <select data-ng-model="teams.team1.points">
                 <option>0</option>
                 <option>1</option>
                 <option>2</option>
@@ -98,7 +98,7 @@
             &nbsp;
         </div>
         <div class="column large-5" style="text-align: center;">
-            <select data-ng-model="teams.away.points">
+            <select data-ng-model="teams.team2.points">
                 <option>0</option>
                 <option>1</option>
                 <option>2</option>

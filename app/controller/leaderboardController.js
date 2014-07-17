@@ -4,31 +4,16 @@
     var app = angular.module('jtfl');
 
     app.controller('leaderboardController', function($scope, Restangular) {
-        $scope.players = [
-            {
-                rank: 1,
-                name: 'Dominik Kukacka',
-                points: 1337,
-                wins: 10,
-                defeats: 0
-            },
-            {
-                rank: 2,
-                name: 'Stefan Schacherl',
-                points: 50,
-                wins: 1,
-                defeats: 0
-            },
-            {
-                rank: 3,
-                name: 'Max Mustermann',
-                points: 0,
-                wins: 0,
-                defeats: 0
-            }
-        ];
+        $scope.players = [];
 
-        $scope.order = 'rank';
+        Restangular.all('players').getList()
+        .then(function(players) {
+            $scope.players = players;
+        }, function(err) {
+            console.log('dafuq',err)
+        });
+
+        $scope.order = 'id';
         $scope.reverse = false;
 
         $scope.changeOrder = function(name) {
@@ -40,13 +25,6 @@
             }
         }
 
-
-        Restangular.all('players').getList()
-        .then(function(players) {
-            $scope.players = players;
-        }, function() {
-
-        });
     });
 
 }(window.angular));

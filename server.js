@@ -8,6 +8,13 @@ var config = require('./config.js'),
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/app'));
 
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    next();
+});
+
 app.get('/players', function(req, res) {
     connectionpool.getConnection(function(err, connection) {
         if (err) {
@@ -18,7 +25,7 @@ app.get('/players', function(req, res) {
                 err: err.code
             });
         } else {
-            connection.query('SELECT * FROM Player', function(err, rows, fields) {
+            connection.query('SELECT * FROM player;', function(err, rows, fields) {
                 if (err) {
                     console.error(err);
                     res.statusCode = 500;
@@ -26,14 +33,9 @@ app.get('/players', function(req, res) {
                         result: 'error',
                         code: err.code
                     });
+                } else {
+                    res.send(rows);
                 }
-                res.send({
-                    result: 'success',
-                    code: 200,
-                    //                  fields: fields
-                    player: rows
-                        //                  length: rows.length
-                });
                 connection.release();
             });
 
@@ -57,7 +59,7 @@ app.post('/players', function(req, res) {
                 Forename: req.body.Forename,
                 Surname: req.body.Surname
             };
-            connection.query('INSERT INTO Player SET ?', post, function(err) {
+            connection.query('INSERT INTO player SET ?;', post, function(err) {
                 if (err) {
                     console.error(err);
                     res.statusCode = 500;
@@ -87,7 +89,7 @@ app.get('/games', function(req, res) {
                 err: err.code
             });
         } else {
-            connection.query('SELECT * FROM Games', function(err, rows, fields) {
+            connection.query('SELECT * FROM game;', function(err, rows, fields) {
                 if (err) {
                     console.error(err);
                     res.statusCode = 500;
@@ -95,15 +97,12 @@ app.get('/games', function(req, res) {
                         result: 'error',
                         code: err.code
                     });
+                } else {
+                    res.send(rows);
                 }
-                res.send({
-                    result: 'success',
-                    code: 200,
-                    Games: rows
-                });
+
                 connection.release();
             });
-
         }
     });
 });
@@ -119,12 +118,13 @@ app.post('/games', function(req, res) {
             });
         } else {
             var post = {
-                Team1_P1: req.body.T1P1,
-                Team1_P2: req.body.T1P2,
-                Team2_P1: req.body.T2P1,
-                Team2_P2: req.body.T2P2
+                team1_player1: req.body.team1[0].id,
+                team1_player2: req.body.team1[1].id,
+                team2_player1: req.body.team2[0].id,
+                team2_player2: req.body.team2[1].id
             };
-            connection.query('INSERT INTO Games SET ?', post, function(err) {
+            console.log(post);
+            connection.query('INSERT INTO game SET ?;', post, function(err, result) {
                 if (err) {
                     console.error(err);
                     res.statusCode = 500;
@@ -132,11 +132,12 @@ app.post('/games', function(req, res) {
                         result: 'error',
                         code: err.code
                     });
+                } else {
+                    res.send({
+                        id: result.insertId
+                    });
                 }
-                res.send({
-                    result: 'success',
-                    code: 200
-                });
+
                 connection.release();
             });
 
@@ -154,7 +155,7 @@ app.put('/games/:id', function(req, res) {
                 err: err.code
             });
         } else {
-            connection.query('SELECT Finished FROM Games WHERE id=' + req.params.id, function(err, result) {
+            connection.query('SELECT finished FROM game WHERE id = ?;', req.params.id, function(err, result) {
                 if (err) {
                     console.error(err);
                     res.statusCode = 500;
@@ -166,11 +167,11 @@ app.put('/games/:id', function(req, res) {
                     console.log(result[0])
                     if (result[0].Finished === 0) {
                         var post = {
-                            Goals_Team1: req.body.GT1,
-                            Goals_Team2: req.body.GT2,
-                            Finished: 1
+                            team1_goals: req.body.team1.goals,
+                            team2_goals: req.body.team1.goals,
+                            finished: 1
                         };
-                        connection.query('UPDATE Games SET ? WHERE id=' + req.params.id, post, function(err) {
+                        connection.query('UPDATE game SET ? WHERE id = ?', req.params.id, post, function(err) {
                             if (err) {
                                 console.error(err);
                                 res.statusCode = 500;
