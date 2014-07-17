@@ -117,14 +117,7 @@ app.post('/games', function(req, res) {
                 err: err.code
             });
         } else {
-            var post = {
-                team1_player1: req.body.team1[0].id,
-                team1_player2: req.body.team1[1].id,
-                team2_player1: req.body.team2[0].id,
-                team2_player2: req.body.team2[1].id
-            };
-            console.log(post);
-            connection.query('INSERT INTO game SET ?;', post, function(err, result) {
+            connection.query('SELECT count(finished) as count FROM game WHERE finished = 0;', req.params.id, function(err, result) {
                 if (err) {
                     console.error(err);
                     res.statusCode = 500;
@@ -133,12 +126,38 @@ app.post('/games', function(req, res) {
                         code: err.code
                     });
                 } else {
-                    res.send({
-                        id: result.insertId
-                    });
+                    if(result[0] !== undefined && result[0].count === 0) {
+                        var post = {
+                            team1_player1: req.body.team1[0].id,
+                            team1_player2: req.body.team1[1].id,
+                            team2_player1: req.body.team2[0].id,
+                            team2_player2: req.body.team2[1].id
+                        };
+                        console.log(post);
+                        connection.query('INSERT INTO game SET ?;', post, function(err, result) {
+                            if (err) {
+                                console.error(err);
+                                res.statusCode = 500;
+                                res.send({
+                                    result: 'error',
+                                    code: err.code
+                                });
+                            } else {
+                                res.send({
+                                    id: result.insertId
+                                });
+                            }
+                            connection.release();
+                        });
+                    } else {
+                        console.log(result[0].count); 
+                        res.statusCode = 403;
+                        res.send({
+                            result: 'error',
+                            code: 403
+                        });
+                    }
                 }
-
-                connection.release();
             });
 
         }
@@ -165,13 +184,13 @@ app.put('/games/:id', function(req, res) {
                     });
                 } else {
                     console.log(result[0])
-                    if (result[0] !== undefined && result[0].Finished === 0) {
+                    if (result[0] !== undefined && result[0].finished === 0) {
                         var post = {
                             team1_goals: req.body.team1.goals,
                             team2_goals: req.body.team2.goals,
                             finished: 1
                         };
-                        connection.query('UPDATE game SET ? WHERE id = ?', req.params.id, post, function(err) {
+                        connection.query('UPDATE game SET ? WHERE id = ?;', [post, req.params.id], function(err) {
                             if (err) {
                                 console.error(err);
                                 res.statusCode = 500;
@@ -179,11 +198,79 @@ app.put('/games/:id', function(req, res) {
                                     result: 'error',
                                     code: err.code
                                 });
+                            } else {
+                                connection.query('SELECT team1_player1, team1_player2, team2_player1, team2_player2 FROM game WHERE id = ?;', req.params.id, function(err, result) {
+                                    if (err) {
+                                        console.error(err);
+                                        res.statusCode = 500;
+                                        res.send({
+                                            result: 'error',
+                                            code: err.code
+                                        });
+                                    } else {
+                                        var teams = {
+                                            team1: {
+                                                won: null,
+                                                players: [result[0].team1_player1, result[0].team1_player2],
+                                                points: null
+                                            },
+                                            teams2: {
+                                                won: null,
+                                                players: [result[0].team2_player1, result[0].team2_player2],
+                                                points: null
+                                            }
+                                        };                                   
+                                        var points = new Array();
+                                        for (var index = 0; index < playerId.length; ++index){
+                                            connection.query('SELECT points FROM player WHERE id=?;', playerId[index], function(err, result){
+                                               if (err) {
+                                                console.error(err);
+                                                res.statusCode = 500
+                                                res.send({
+                                                    result:'error',
+                                                    code: err.code
+                                                });
+                                               } else {
+                                                points.push(result[0].points);
+                                                if (points.length===4) {
+                                                    var pointsTeam1 = points[0]+points[1];
+                                                    var pointsTeam2 = points[2]+points[3];
+                                                    if (Math.abs(pointsTeam1-pointsTeam2) > 400){
+                                                        var difference = 400;
+                                                    } else if (Math.abs(pointsTeam1-pointsTeam2) < -400) {
+                                                        var difference = -400;
+                                                    } else {
+                                                        var difference = Math.abs(pointsTeam1-pointsTeam2);
+                                                    }
+                                                    var gain = Math.round((1/(1+Math.pow(10,difference/400)))*10);
+                                                    
+                                                    console.log(points, playerId, difference,gain);
+                                                    
+                                                    if(post.team1_goals > post.team2_goals) {
+                                                        teams.team1.won = true;
+                                                        teams.team1.points = gain;
+                                                        teams.team2.won = false;
+                                                        teams.team2.points = -gain;
+                                                    } else {
+                                                        teams.team1.won = false;
+                                                        teams.team1.points = -gain;
+                                                        teams.team2.won = true;
+                                                        teams.team2.points = gain;
+                                                    }
+                                                    connection.query('UPDATE player SET points=points+?')
+                                                }
+                                               } 
+                                            });   
+                                        }
+
+                                        
+                                    }
+                                });
+                                res.send({
+                                    result: 'success',
+                                    code: 200
+                                });   
                             }
-                            res.send({
-                                result: 'success',
-                                code: 200
-                            });
                             connection.release();
                         });
 
