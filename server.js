@@ -165,10 +165,10 @@ app.put('/games/:id', function(req, res) {
                     });
                 } else {
                     console.log(result[0])
-                    if (result[0].Finished === 0) {
+                    if (result[0] !== undefined && result[0].Finished === 0) {
                         var post = {
                             team1_goals: req.body.team1.goals,
-                            team2_goals: req.body.team1.goals,
+                            team2_goals: req.body.team2.goals,
                             finished: 1
                         };
                         connection.query('UPDATE game SET ? WHERE id = ?', req.params.id, post, function(err) {
@@ -188,7 +188,7 @@ app.put('/games/:id', function(req, res) {
                         });
 
                     } else {
-                        res.statusCode = 500;
+                        res.statusCode = 403;
                         res.send({
                             result: 'error',
                             code: 403
