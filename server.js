@@ -81,15 +81,15 @@ app.post('/players', function(req, res) {
                             throw err;
                         });
                     } else {
-                        connction.commit(function (err) {
-                            if (err)  {
-                                connection.rollback(function(){
-                                    res.statusCode = 500;
-                                    res.send({
-                                        result: 'error',
-                                        code: 500
-                                    });
-                                    throw err;
+                        connection.commit(function (err) {
+                            if (err) {
+                                res.statusCode = 500;
+                                res.send({
+                                    result:'error',
+                                    code: err.code
+                                });
+                                connection.rollback(function() {
+                                   throw err; 
                                 });
                             }
                         });
