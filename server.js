@@ -14,6 +14,15 @@ function sendError(res, err, statCode) {
     });
 };
 
+function sendCustomError(res, errMessage, errCode, statCode) {
+    console.error('APPLICATION error: ', errMessage);
+    res.statusCode = statCode;
+    res.send({
+        result: errMessage,
+        err: errCode
+    });
+};
+
 function createQueryPlayerUpdate (post, points, teams, update) {
     var pointsTeam1 = points[0]+points[1];
     var pointsTeam2 = points[2]+points[3];
@@ -50,16 +59,14 @@ function createQueryPlayerUpdate (post, points, teams, update) {
 function updateGame (connection, req, res, post, teams) {
     connection.query('UPDATE game SET ? WHERE id = ?;', [post, req.params.id], function putGamesUpdateResult(err) {
         if (err) {
-            sendError(res, err, 500);
             connection.rollback(function(){
-                throw err;
+                sendError(res, err, 500);
             });
         } else {
             connection.query('SELECT team1_player1, team1_player2, team2_player1, team2_player2 FROM game WHERE id = ?;', req.params.id, function putGamesSelectPlayers(err, result) {
                 if (err) {
-                    sendError(res, err, 500);
                     connection.rollback(function(){
-                        throw err;
+                        sendError(res, err, 500);
                     });
                 } else {
                     var playerId = [
@@ -85,9 +92,8 @@ function updatePlayersGetPoints (connection, res, post, playerId, teams) {
     for (var index = 0; index < playerId.length; ++index) {
         connection.query('SELECT points FROM player WHERE id=?;', playerId[index], function putGamesSelectPlayersPoints(err, result) {
             if (err) {
-                sendError(res, err, 500);
                 connection.rollback(function(){
-                    throw err;
+                    sendError(res, err, 500);
                 });
             } else {
                 points.push(result[0].points);
@@ -123,9 +129,8 @@ function updatePlayersQuery(connection, res, post, teams, points, update) {
             }
         });
         } else {
-            sendError(res, err, 500);
             connection.rollback(function(){
-                throw err;
+                sendError(res, err, 500);
             });
         }
     }
@@ -181,9 +186,8 @@ app.post('/players', function postPlayers(req, res) {
                     } else {
                         connection.commit(function (err) {
                             if (err) {
-                                sendError(res, err, 500);
                                 connection.rollback(function() {
-                                   throw err; 
+                                   sendError(res, err, 500);
                                 });
                             }
                         });
@@ -226,13 +230,11 @@ app.post('/games', function postGames(req, res) {
             connection.beginTransaction(function (err) {
                 if (err) {
                     sendError(res, err, 500);
-                    throw err;
                 }
                 connection.query('SELECT count(finished) as count FROM game WHERE finished = 0;', req.params.id, function postGamesSelectUnfinished(err, result) {
                     if (err) {
-                        sendError(res, err, 500);
                         connection.rollback(function (){
-                           throw err; 
+                            sendError(res, err, 500); 
                         });
                     } else {
                         if(result[0] !== undefined && result[0].count === 0) {
@@ -245,16 +247,14 @@ app.post('/games', function postGames(req, res) {
                             console.log(post);
                             connection.query('INSERT INTO game SET ?;', post, function postGamesResult(err, result) {
                                 if (err) {
-                                    sendError(res, err, 500);
                                     connection.rollback(function(){
-                                       throw err; 
+                                       sendError(res, err, 500); 
                                     });
                                 } else {
                                     connection.commit(function(err){
                                         if(err){
-                                            sendError(res, err, 500);
                                             connection.rollback(function (){
-                                                throw err;
+                                                sendError(res, err, 500);
                                             });
                                         }
                                     });
@@ -265,12 +265,8 @@ app.post('/games', function postGames(req, res) {
                                 connection.release();
                             });
                         } else {
-                            console.log(result[0].count); 
-                            res.statusCode = 403;
-                            res.send({
-                                result: 'error',
-                                code: 403
-                            });
+                            console.log(result[0].count);
+                            sendCustomError(res, 'Last game is not finished yet!', 'LAST_GAME_UNFINISHED_ERROR', 403);
                         }
                     }
                 });
@@ -305,29 +301,24 @@ app.put('/games/:id', function putGames(req, res) {
         } else {
             connection.beginTransaction(function putGamesTransaction(err) {
                 if (err) {
-                    throw err;
-                }
-
-                connection.query('SELECT finished FROM game WHERE id = ?;', req.params.id, function putGamesCheckUnfinished(err, result) {
-                    if (err) {
-                        sendError(res, err, 500);
-                        connection.rollback(function(){
-                            throw err;
-                        });
-                    } else {
-                        console.log(result[0]);
-                        if (result[0] !== undefined && result[0].finished === 0) {
-                            updateGame (connection, req, res, post, teams);
-                        } else {
-                            res.statusCode = 403;
-                            res.send({
-                                result: 'error',
-                                code: 403
+                    sendError(res, err, 500);
+                } else {
+                    connection.query('SELECT finished FROM game WHERE id = ?;', req.params.id, function putGamesCheckUnfinished(err, result) {
+                        if (err) {
+                            connection.rollback(function(){
+                                sendError(res, err, 500);
                             });
+                        } else {
+                            console.log(result[0]);
+                            if (result[0] !== undefined && result[0].finished === 0) {
+                                updateGame (connection, req, res, post, teams);
+                            } else {
+                                sendCustomError(res, 'Game is already in finished state!', 'FINISHED_GAME_ERROR', 403);
+                            }
+                            connection.release();
                         }
-                        connection.release();
-                    }
-                });
+                    });
+                }
             });
         }
     });
