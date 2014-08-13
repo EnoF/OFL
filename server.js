@@ -195,7 +195,7 @@ app.get('/players', function getPlayers(req, res) {
                 if (err) {
                     sendError(res, err, 500);
                 } else {
-                    sendSuccess(res, rows, 200);
+                    sendSuccess(res, { players: rows }, 200);
                 }
                 connection.release();
             });
@@ -250,7 +250,7 @@ app.get('/games', function getGames(req, res) {
                 if (err) {
                     sendError(res, err, 500);
                 } else {
-                    sendSuccess(res, rows, 200);
+                    sendSuccess(res, { games: rows }, 200);
                 }
 
                 connection.release();
