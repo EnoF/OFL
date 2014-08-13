@@ -9,6 +9,11 @@ function hasWon(goalsTeam1, goalsTeam2) {
     return ((goalsTeam1 > goalsTeam2) ? true : false);
 };
 
+function sendSuccess (res, sendObject, statCode) {
+    res.statusCode = statCode;
+    res.send(sendObject);
+};
+
 function sendError(res, err, statCode) {
     console.error('CONNECTION error: ', err);
     res.statusCode = statCode;
@@ -47,10 +52,9 @@ function createGame (connection, req, res, result) {
                         connection.rollback(function (){
                             sendError(res, err, 500);
                         });
+                    } else {
+                        sendSuccess(res, { id: result.insertId }, 201);
                     }
-                });
-                res.send({
-                    id: result.insertId
                 });
             }
             
@@ -159,10 +163,7 @@ function updatePlayersQuery(connection, res, teams, points, update) {
                                 });
                             }
                         });
-                        res.send({
-                            result: 'success',
-                            code: 200
-                        });
+                        sendSuccess(res, { result: 'success' }, 200);
                     }
                 });
             }
@@ -194,7 +195,7 @@ app.get('/players', function getPlayers(req, res) {
                 if (err) {
                     sendError(res, err, 500);
                 } else {
-                    res.send(rows);
+                    sendSuccess(res, rows, 200);
                 }
                 connection.release();
             });
@@ -228,12 +229,9 @@ app.post('/players', function postPlayers(req, res) {
                                 connection.rollback(function() {
                                    sendError(res, err, 500);
                                 });
+                            } else {
+                                sendSuccess(res, { id: result.insertId }, 201);
                             }
-                        });
-                        res.send({
-                            result: 'success',
-                            code: 200,
-                            id: result.insertId
                         });
                     }
                 });
@@ -252,7 +250,7 @@ app.get('/games', function getGames(req, res) {
                 if (err) {
                     sendError(res, err, 500);
                 } else {
-                    res.send(rows);
+                    sendSuccess(res, rows, 200);
                 }
 
                 connection.release();
