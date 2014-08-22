@@ -285,7 +285,11 @@ app.post('/games', function postGames(req, res) {
 });
 
 app.put('/games/:id', function putGames(req, res) {
-        var teams = {
+    if (req.body.team1.goals === req.body.team2.goals) {
+        sendCustomError(res, 'There is no draw foosball!', 'NO_DRAW_ALLOWED_ERROR', 403);
+        return;
+    }
+    var teams = {
         team1: {
             goals: req.body.team1.goals,
             won: hasWon(req.body.team1.goals, req.body.team2.goals),
