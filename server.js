@@ -9,13 +9,21 @@ function hasWon(goalsTeam1, goalsTeam2) {
     return ((goalsTeam1 > goalsTeam2) ? true : false);
 };
 
-function sendSuccess (res, sendObject, statCode) {
+function logTimeBuilder() {
+    var d = new Date;
+    return d.toISOString();
+}
+
+function sendSuccess (res, sendObject, statCode, logMessage) {
+    if (!!logMessage) {
+        console.info(logTimeBuilder(), logMessage);
+    } 
     res.statusCode = statCode;
     res.send(sendObject);
 };
 
 function sendError(res, err, statCode) {
-    console.error('CONNECTION error: ', err);
+    console.error(logTimeBuilder(), 'CONNECTION error:', err);
     res.statusCode = statCode;
     res.send({
         result: 'error',
@@ -24,7 +32,7 @@ function sendError(res, err, statCode) {
 };
 
 function sendCustomError(res, errMessage, errCode, statCode) {
-    console.error('APPLICATION error: ', errMessage);
+    console.error(logTimeBuilder(), 'APPLICATION error:', errMessage);
     res.statusCode = statCode;
     res.send({
         result: errMessage,
@@ -40,7 +48,6 @@ function createGame (connection, req, res, result) {
             team2_player1: req.body.team2[0].id,
             team2_player2: req.body.team2[1].id
         };
-        console.log(post);
         connection.query('INSERT INTO game SET ?;', post, function postGamesResult(err, result) {
             if (err) {
                 connection.rollback(function(){
@@ -53,14 +60,14 @@ function createGame (connection, req, res, result) {
                             sendError(res, err, 500);
                         });
                     } else {
-                        sendSuccess(res, { id: result.insertId }, 201);
+                        var logInfo = 'INFO: New game has been created with ID ' + result.insertId;
+                        sendSuccess(res, { id: result.insertId }, 201, logInfo);
                     }
                 });
             }
             
         });
     } else {
-        console.log(result[0].count);
         sendCustomError(res, 'Last game is not finished yet!', 'LAST_GAME_UNFINISHED_ERROR', 403);
     }
 };
@@ -78,8 +85,6 @@ function createQueryPlayerUpdate (points, teams, update) {
     }
     var gain = Math.round((1/(1+Math.pow(10,difference/eloMax)))*10);
 
-    console.log(points, difference, gain);
-
     if(teams.team1.won) {
         teams.team1.points = gain;
         teams.team2.points = -gain;
@@ -91,7 +96,6 @@ function createQueryPlayerUpdate (points, teams, update) {
         update.push('UPDATE player SET points=points+'+teams.team1.points+', defeats=defeats+1 WHERE id='+teams.team1.players[0]+' OR id='+teams.team1.players[1]+';');
         update.push('UPDATE player SET points=points+'+teams.team2.points+', victories=victories+1 WHERE id='+teams.team2.players[0]+' OR id='+teams.team2.players[1]+';');
     }
-    console.log(update.join());
 };
 
 function updateGame (connection, req, res, teams) {
@@ -149,7 +153,6 @@ function updatePlayersGetPoints (connection, res, playerId, teams) {
 function updatePlayersQuery(connection, res, teams, points, update) {
     if (points.length===4) {
         createQueryPlayerUpdate(points, teams, update);
-        console.log(update.join(''));
 
         if(update.length===2) {
         connection.query(update[0], function putGamesUpdateTeam1(err) {
@@ -163,7 +166,7 @@ function updatePlayersQuery(connection, res, teams, points, update) {
                                 });
                             }
                         });
-                        sendSuccess(res, { result: 'success' }, 200);
+                        sendSuccess(res, { result: 'success' }, 200, null);
                     }
                 });
             }
@@ -195,7 +198,7 @@ app.get('/players', function getPlayers(req, res) {
                 if (err) {
                     sendError(res, err, 500);
                 } else {
-                    sendSuccess(res, { players: rows }, 200);
+                    sendSuccess(res, { players: rows }, 200, null);
                 }
                 connection.release();
             });
@@ -213,7 +216,6 @@ app.post('/players', function postPlayers(req, res) {
                 firstname: req.body.firstname,
                 lastname: req.body.lastname
             };
-            console.log(post);
             connection.beginTransaction(function (err) {
                 if (err) {
                     sendError(res, err, 500);
@@ -230,7 +232,8 @@ app.post('/players', function postPlayers(req, res) {
                                    sendError(res, err, 500);
                                 });
                             } else {
-                                sendSuccess(res, { id: result.insertId }, 201);
+                                var logInfo = 'INFO: New player ' + post.firstname + ' ' + post.lastname + ' has been created with ID ' + result.insertId;
+                                sendSuccess(res, { id: result.insertId }, 201, logInfo);
                             }
                         });
                     }
@@ -250,7 +253,7 @@ app.get('/games', function getGames(req, res) {
                 if (err) {
                     sendError(res, err, 500);
                 } else {
-                    sendSuccess(res, { games: rows }, 200);
+                    sendSuccess(res, { games: rows }, 200, null);
                 }
 
                 connection.release();
@@ -302,8 +305,7 @@ app.put('/games/:id', function putGames(req, res) {
             players: null,
             points: null
         }
-    }; 
-    console.log(teams);
+    };
     var update = [];
     connectionpool.getConnection(function(err, connection) {
 
@@ -320,7 +322,6 @@ app.put('/games/:id', function putGames(req, res) {
                                 sendError(res, err, 500);
                             });
                         } else {
-                            console.log(result[0]);
                             if (result[0] !== undefined && result[0].finished === 0) {
                                 updateGame (connection, req, res, teams);
                             } else {
