@@ -40,6 +40,30 @@ function sendCustomError(res, errMessage, errCode, statCode) {
     });
 };
 
+function createPlayer(connection, post, res, result) {
+    if(result[0] !== undefined && result[0].count === 0) {
+        connection.query('INSERT INTO player SET ?;', post, function postPlayersResult(err, result) {
+            if (err) {
+                connection.rollback(function(){
+                    sendError(res, err, 500);
+                });
+            } else {
+                connection.commit(function (err) {
+                    if (err) {
+                        connection.rollback(function() {
+                           sendError(res, err, 500);
+                        });
+                    } else {
+                        sendSuccess(res, { id: result.insertId }, 201);
+                    }
+                });
+            }
+        });
+    } else {
+        sendCustomError(res, 'Palyer already exists!', 'PLAYER_EXISTS_ERROR', 403)
+    }
+}
+
 function createGame (connection, req, res, result) {
     if(result[0] !== undefined && result[0].count === 0) {
         var post = {
@@ -219,25 +243,19 @@ app.post('/players', function postPlayers(req, res) {
             connection.beginTransaction(function (err) {
                 if (err) {
                     sendError(res, err, 500);
+                } else {
+                    var queryPlayer = 'SELECT count(id) as count FROM player WHERE firstname=\''+post.firstname+'\' AND lastname=\''+post.lastname+'\'';
+
+                    connection.query(queryPlayer, function checkPlayerExists(err, result) {
+                        if (err) {
+                            connection.rollback(function(){
+                                sendError(res, err, 500);
+                            });
+                        } else {
+                            createPlayer(connection, post, res, result);
+                        }
+                    });
                 }
-                connection.query('INSERT INTO player SET ?;', post, function postPlayersResult(err, result) {
-                    if (err) {
-                        connection.rollback(function(){
-                            sendError(res, err, 500);
-                        });
-                    } else {
-                        connection.commit(function (err) {
-                            if (err) {
-                                connection.rollback(function() {
-                                   sendError(res, err, 500);
-                                });
-                            } else {
-                                var logInfo = 'INFO: New player ' + post.firstname + ' ' + post.lastname + ' has been created with ID ' + result.insertId;
-                                sendSuccess(res, { id: result.insertId }, 201, logInfo);
-                            }
-                        });
-                    }
-                });
                 connection.release();
             });
         }
