@@ -1,7 +1,4 @@
 module.exports = {
-	connection: {
-
-	},
 	errors: {
 		errorType: {
 			connection:  'CONNECTION error:',
