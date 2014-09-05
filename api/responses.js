@@ -1,4 +1,7 @@
+var strings = require('./strings.js');
+
 module.exports = function Responses() {
+
 	this.sendSuccess = function (res, sendObject, statCode, logMessage) {
 	    if (!!logMessage) {
 	        console.info(logTimeBuilder(), logMessage);

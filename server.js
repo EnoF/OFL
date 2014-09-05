@@ -4,6 +4,8 @@ var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var strings = require('./api/strings.js');
 var Responses = require('./api/responses.js');
+
+var response = new Responses();
 var app = express();
 var connectionpool = mysql.createPool(config.mysql);
 
@@ -11,59 +13,28 @@ function hasWon(goalsTeam1, goalsTeam2) {
     return ((goalsTeam1 > goalsTeam2) ? true : false);
 }
 
-function logTimeBuilder() {
-    var d = new Date;
-    return d.toISOString();
-}
-
-function sendSuccess (res, sendObject, statCode, logMessage) {
-    if (!!logMessage) {
-        console.info(logTimeBuilder(), logMessage);
-    } 
-    res.statusCode = statCode;
-    res.send(sendObject);
-}
-
-function sendError(res, err, statCode) {
-    console.error(logTimeBuilder(), strings.errors.errorType.connection, err);
-    res.statusCode = statCode;
-    res.send({
-        result: 'error',
-        err: err.code
-    });
-}
-
-function sendCustomError(res, err, statCode) {
-    console.error(logTimeBuilder(), strings.errors.errorType.application, err.message);
-    res.statusCode = statCode;
-    res.send({
-        result: err.message,
-        err: err.code
-    });
-}
-
 function createPlayer(connection, post, res, result) {
     if(result[0] !== undefined && result[0].count === 0) {
         connection.query('INSERT INTO player SET ?;', post, function postPlayersResult(err, result) {
             if (err) {
                 connection.rollback(function(){
-                    sendError(res, err, 500);
+                    response.sendError(res, err, 500);
                 });
             } else {
                 connection.commit(function (err) {
                     if (err) {
                         connection.rollback(function() {
-                           sendError(res, err, 500);
+                           response.sendError(res, err, 500);
                         });
                     } else {
                         var logInfo = strings.logging.newPlayerCreated + result.insertId;
-                        sendSuccess(res, { id: result.insertId }, 201, logInfo);
+                        response.sendSuccess(res, { id: result.insertId }, 201, logInfo);
                     }
                 });
             }
         });
     } else {
-        sendCustomError(res, strings.errors.playerExists, 403)
+        response.sendCustomError(res, strings.errors.playerExists, 403)
     }
 }
 
@@ -78,24 +49,24 @@ function createGame (connection, req, res, result) {
         connection.query('INSERT INTO game SET ?;', post, function postGamesResult(err, result) {
             if (err) {
                 connection.rollback(function(){
-                   sendError(res, err, 500); 
+                   response.sendError(res, err, 500); 
                 });
             } else {
                 connection.commit(function(err){
                     if(err){
                         connection.rollback(function (){
-                            sendError(res, err, 500);
+                            response.sendError(res, err, 500);
                         });
                     } else {
                         var logInfo = strings.logging.newGameCreated + result.insertId;
-                        sendSuccess(res, { id: result.insertId }, 201, logInfo);
+                        response.sendSuccess(res, { id: result.insertId }, 201, logInfo);
                     }
                 });
             }
             
         });
     } else {
-        sendCustomError(res, strings.errors.gameUnfinished, 403);
+        response.sendCustomError(res, strings.errors.gameUnfinished, 403);
     }
 }
 
@@ -150,13 +121,13 @@ function updateGame (connection, req, res, teams) {
     connection.query('UPDATE game SET ? WHERE id = ?;', [post, req.params.id], function putGamesUpdateResult(err) {
         if (err) {
             connection.rollback(function(){
-                sendError(res, err, 500);
+                response.sendError(res, err, 500);
             });
         } else {
             connection.query('SELECT team1_player1, team1_player2, team2_player1, team2_player2 FROM game WHERE id = ?;', req.params.id, function putGamesSelectPlayers(err, result) {
                 if (err) {
                     connection.rollback(function(){
-                        sendError(res, err, 500);
+                        response.sendError(res, err, 500);
                     });
                 } else {
                     var playerId = [
@@ -183,7 +154,7 @@ function updatePlayersGetPoints (connection, res, playerId, teams) {
         connection.query('SELECT points FROM player WHERE id=?;', playerId[index], function putGamesSelectPlayersPoints(err, result) {
             if (err) {
                 connection.rollback(function(){
-                    sendError(res, err, 500);
+                    response.sendError(res, err, 500);
                 });
             } else {
                 points.push(result[0].points);
@@ -205,18 +176,18 @@ function updatePlayersQuery(connection, res, teams, points, update) {
                         connection.commit(function (err) {
                             if (err) {
                                 connection.rollback(function() {
-                                   sendError(res, err, 500);
+                                   response.sendError(res, err, 500);
                                 });
                             }
                         });
-                        sendSuccess(res, { result: 'success' }, 200, null);
+                        response.sendSuccess(res, { result: 'success' }, 200, null);
                     }
                 });
             }
         });
         } else {
             connection.rollback(function(){
-                sendError(res, err, 500);
+                response.sendError(res, err, 500);
             });
         }
     }
@@ -235,13 +206,13 @@ app.use(function(req, res, next) {
 app.get('/players', function getPlayers(req, res) {
     connectionpool.getConnection(function(err, connection) {
         if (err) {
-            sendError(res, err, 503);
+            response.sendError(res, err, 503);
         } else {
             connection.query('SELECT * FROM player;', function getPlayersResult(err, rows, fields) {
                 if (err) {
-                    sendError(res, err, 500);
+                    response.sendError(res, err, 500);
                 } else {
-                    sendSuccess(res, { players: rows }, 200, null);
+                    response.sendSuccess(res, { players: rows }, 200, null);
                 }
                 connection.release();
             });
@@ -253,7 +224,7 @@ app.get('/players', function getPlayers(req, res) {
 app.post('/players', function postPlayers(req, res) {
     connectionpool.getConnection(function(err, connection) {
         if (err) {
-            sendError(res, err, 503);
+            response.sendError(res, err, 503);
         } else {
             var post = {
                 firstname: req.body.firstname,
@@ -261,12 +232,12 @@ app.post('/players', function postPlayers(req, res) {
             };
             connection.beginTransaction(function (err) {
                 if (err) {
-                    sendError(res, err, 500);
+                    response.sendError(res, err, 500);
                 } else {
                     connection.query('SELECT count(id) as count FROM player WHERE firstname=? AND lastname=?', [post.firstname, post.lastname], function checkPlayerExists(err, result) {
                         if (err) {
                             connection.rollback(function(){
-                                sendError(res, err, 500);
+                                response.sendError(res, err, 500);
                             });
                         } else {
                             createPlayer(connection, post, res, result);
@@ -282,13 +253,13 @@ app.post('/players', function postPlayers(req, res) {
 app.get('/games', function getGames(req, res) {
     connectionpool.getConnection(function(err, connection) {
         if (err) {
-            sendError(res, err, 503);
+            response.sendError(res, err, 503);
         } else {
             connection.query('SELECT * FROM game;', function getGamesResult(err, rows, fields) {
                 if (err) {
-                    sendError(res, err, 500);
+                    response.sendError(res, err, 500);
                 } else {
-                    sendSuccess(res, { games: rows }, 200, null);
+                    response.sendSuccess(res, { games: rows }, 200, null);
                 }
 
                 connection.release();
@@ -300,16 +271,16 @@ app.get('/games', function getGames(req, res) {
 app.post('/games', function postGames(req, res) {
     connectionpool.getConnection(function(err, connection) {
         if (err) {
-            sendError(res, err, 503);
+            response.sendError(res, err, 503);
         } else {
             connection.beginTransaction(function (err) {
                 if (err) {
-                    sendError(res, err, 500);
+                    response.sendError(res, err, 500);
                 } else {
                     connection.query('SELECT count(finished) as count FROM game WHERE finished = 0;', req.params.id, function postGamesSelectUnfinished(err, result) {
                         if (err) {
                             connection.rollback(function (){
-                                sendError(res, err, 500); 
+                                response.sendError(res, err, 500); 
                             });
                         } else {
                             createGame (connection, req, res, result);
@@ -324,7 +295,7 @@ app.post('/games', function postGames(req, res) {
 
 app.put('/games/:id', function putGames(req, res) {
     if (req.body.team1.goals === req.body.team2.goals) {
-        sendCustomError(res, strings.errors.drawForbidden, 403);
+        response.sendCustomError(res, strings.errors.drawForbidden, 403);
         return;
     }
     var teams = {
@@ -345,22 +316,22 @@ app.put('/games/:id', function putGames(req, res) {
     connectionpool.getConnection(function(err, connection) {
 
         if (err) {
-            sendError(res, err, 503);
+            response.sendError(res, err, 503);
         } else {
             connection.beginTransaction(function putGamesTransaction(err) {
                 if (err) {
-                    sendError(res, err, 500);
+                    response.sendError(res, err, 500);
                 } else {
                     connection.query('SELECT finished FROM game WHERE id = ?;', req.params.id, function putGamesCheckUnfinished(err, result) {
                         if (err) {
                             connection.rollback(function(){
-                                sendError(res, err, 500);
+                                response.sendError(res, err, 500);
                             });
                         } else {
                             if (result[0] !== undefined && result[0].finished === 0) {
                                 updateGame (connection, req, res, teams);
                             } else {
-                                sendCustomError(res, strings.errors.gameFinished, 403);
+                                response.sendCustomError(res, strings.errors.gameFinished, 403);
                             }
                         }
                     });
