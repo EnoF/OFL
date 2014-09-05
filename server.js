@@ -8,7 +8,7 @@ var connectionpool = mysql.createPool(config.mysql);
 
 function hasWon(goalsTeam1, goalsTeam2) {
     return ((goalsTeam1 > goalsTeam2) ? true : false);
-};
+}
 
 function logTimeBuilder() {
     var d = new Date;
@@ -21,7 +21,7 @@ function sendSuccess (res, sendObject, statCode, logMessage) {
     } 
     res.statusCode = statCode;
     res.send(sendObject);
-};
+}
 
 function sendError(res, err, statCode) {
     console.error(logTimeBuilder(), strings.errors.errorType.connection, err);
@@ -30,7 +30,7 @@ function sendError(res, err, statCode) {
         result: 'error',
         err: err.code
     });
-};
+}
 
 function sendCustomError(res, err, statCode) {
     console.error(logTimeBuilder(), strings.errors.errorType.application, err.message);
@@ -39,7 +39,7 @@ function sendCustomError(res, err, statCode) {
         result: err.message,
         err: err.code
     });
-};
+}
 
 function createPlayer(connection, post, res, result) {
     if(result[0] !== undefined && result[0].count === 0) {
@@ -96,7 +96,7 @@ function createGame (connection, req, res, result) {
     } else {
         sendCustomError(res, strings.errors.gameUnfinished, 403);
     }
-};
+}
 
 function createQueryPlayerUpdate (points, teams, update) {
     var pointsTeam1 = points[0]+points[1];
@@ -138,7 +138,7 @@ function createQueryPlayerUpdate (points, teams, update) {
             +' OR id='+mysql.escape(teams.team2.players[1])
             +';');
     }
-};
+}
 
 function updateGame (connection, req, res, teams) {
     var post = {
@@ -173,7 +173,7 @@ function updateGame (connection, req, res, teams) {
         }
         
     });
-};
+}
 
 function updatePlayersGetPoints (connection, res, playerId, teams) {
     var points = [];
@@ -190,7 +190,7 @@ function updatePlayersGetPoints (connection, res, playerId, teams) {
             }
         });
     }
-};
+}
 
 function updatePlayersQuery(connection, res, teams, points, update) {
     if (points.length===4) {
@@ -219,7 +219,7 @@ function updatePlayersQuery(connection, res, teams, points, update) {
             });
         }
     }
-};
+}
 
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/app'));
