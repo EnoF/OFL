@@ -1,9 +1,10 @@
-var config = require('./config.js'),
-    express = require('express'),
-    bodyParser = require('body-parser'),
-    app = express(),
-    mysql = require('mysql'),
-    connectionpool = mysql.createPool(config.mysql);
+var config = require('./config.js');
+var express = require('express');
+var bodyParser = require('body-parser');
+var mysql = require('mysql');
+var strings = require('./api/strings.js');
+var app = express();
+var connectionpool = mysql.createPool(config.mysql);
 
 function hasWon(goalsTeam1, goalsTeam2) {
     return ((goalsTeam1 > goalsTeam2) ? true : false);
@@ -23,7 +24,7 @@ function sendSuccess (res, sendObject, statCode, logMessage) {
 };
 
 function sendError(res, err, statCode) {
-    console.error(logTimeBuilder(), 'CONNECTION error:', err);
+    console.error(logTimeBuilder(), strings.errors.errorType.connection, err);
     res.statusCode = statCode;
     res.send({
         result: 'error',
@@ -31,12 +32,12 @@ function sendError(res, err, statCode) {
     });
 };
 
-function sendCustomError(res, errMessage, errCode, statCode) {
-    console.error(logTimeBuilder(), 'APPLICATION error:', errMessage);
+function sendCustomError(res, err, statCode) {
+    console.error(logTimeBuilder(), strings.errors.errorType.application, err.message);
     res.statusCode = statCode;
     res.send({
-        result: errMessage,
-        err: errCode
+        result: err.message,
+        err: err.code
     });
 };
 
@@ -54,13 +55,14 @@ function createPlayer(connection, post, res, result) {
                            sendError(res, err, 500);
                         });
                     } else {
-                        sendSuccess(res, { id: result.insertId }, 201);
+                        var logInfo = strings.logging.newPlayerCreated + result.insertId;
+                        sendSuccess(res, { id: result.insertId }, 201, logInfo);
                     }
                 });
             }
         });
     } else {
-        sendCustomError(res, 'Palyer already exists!', 'PLAYER_EXISTS_ERROR', 403)
+        sendCustomError(res, strings.errors.playerExists, 403)
     }
 }
 
@@ -84,7 +86,7 @@ function createGame (connection, req, res, result) {
                             sendError(res, err, 500);
                         });
                     } else {
-                        var logInfo = 'INFO: New game has been created with ID ' + result.insertId;
+                        var logInfo = strings.logging.newGameCreated + result.insertId;
                         sendSuccess(res, { id: result.insertId }, 201, logInfo);
                     }
                 });
@@ -92,7 +94,7 @@ function createGame (connection, req, res, result) {
             
         });
     } else {
-        sendCustomError(res, 'Last game is not finished yet!', 'LAST_GAME_UNFINISHED_ERROR', 403);
+        sendCustomError(res, strings.errors.gameUnfinished, 403);
     }
 };
 
@@ -112,13 +114,29 @@ function createQueryPlayerUpdate (points, teams, update) {
     if(teams.team1.won) {
         teams.team1.points = gain;
         teams.team2.points = -gain;
-        update.push('UPDATE player SET points=points+'+teams.team1.points+', victories=victories+1 WHERE id='+teams.team1.players[0]+' OR id='+teams.team1.players[1]+';');
-        update.push('UPDATE player SET points=points+'+teams.team2.points+', defeats=defeats+1 WHERE id='+teams.team2.players[0]+' OR id='+teams.team2.players[1]+';');
+        update.push(
+            'UPDATE player SET points=points+'+mysql.escape(teams.team1.points)
+            +', victories=victories+1 WHERE id='+mysql.escape(teams.team1.players[0])
+            +' OR id=' +mysql.escape(teams.team1.players[1])
+            +';');
+        update.push(
+            'UPDATE player SET points=points+'+mysql.escape(teams.team2.points)
+            +', defeats=defeats+1 WHERE id='+mysql.escape(teams.team2.players[0])
+            +' OR id='+mysql.escape(teams.team2.players[1])
+            +';');
     } else {
         teams.team1.points = -gain;
         teams.team2.points = gain;
-        update.push('UPDATE player SET points=points+'+teams.team1.points+', defeats=defeats+1 WHERE id='+teams.team1.players[0]+' OR id='+teams.team1.players[1]+';');
-        update.push('UPDATE player SET points=points+'+teams.team2.points+', victories=victories+1 WHERE id='+teams.team2.players[0]+' OR id='+teams.team2.players[1]+';');
+        update.push(
+            'UPDATE player SET points=points+'+mysql.escape(teams.team1.points)
+            +', defeats=defeats+1 WHERE id='+mysql.escape(teams.team1.players[0])
+            +' OR id='+mysql.escape(teams.team1.players[1])
+            +';');
+        update.push(
+            'UPDATE player SET points=points+'+mysql.escape(teams.team2.points)
+            +', victories=victories+1 WHERE id='+mysql.escape(teams.team2.players[0])
+            +' OR id='+mysql.escape(teams.team2.players[1])
+            +';');
     }
 };
 
@@ -244,9 +262,7 @@ app.post('/players', function postPlayers(req, res) {
                 if (err) {
                     sendError(res, err, 500);
                 } else {
-                    var queryPlayer = 'SELECT count(id) as count FROM player WHERE firstname=\''+post.firstname+'\' AND lastname=\''+post.lastname+'\'';
-
-                    connection.query(queryPlayer, function checkPlayerExists(err, result) {
+                    connection.query('SELECT count(id) as count FROM player WHERE firstname=? AND lastname=?', [post.firstname, post.lastname], function checkPlayerExists(err, result) {
                         if (err) {
                             connection.rollback(function(){
                                 sendError(res, err, 500);
@@ -307,7 +323,7 @@ app.post('/games', function postGames(req, res) {
 
 app.put('/games/:id', function putGames(req, res) {
     if (req.body.team1.goals === req.body.team2.goals) {
-        sendCustomError(res, 'There is no draw foosball!', 'NO_DRAW_ALLOWED_ERROR', 403);
+        sendCustomError(res, strings.errors.drawForbidden, 403);
         return;
     }
     var teams = {
@@ -343,7 +359,7 @@ app.put('/games/:id', function putGames(req, res) {
                             if (result[0] !== undefined && result[0].finished === 0) {
                                 updateGame (connection, req, res, teams);
                             } else {
-                                sendCustomError(res, 'Game is already in finished state!', 'FINISHED_GAME_ERROR', 403);
+                                sendCustomError(res, strings.errors.gameFinished, 403);
                             }
                         }
                     });
