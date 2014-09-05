@@ -330,8 +330,11 @@ app.put('/games/:id', function putGames(req, res) {
                         } else {
                             if (result[0] !== undefined && result[0].finished === 0) {
                                 updateGame (connection, req, res, teams);
-                            } else {
+                            } else if (result[0] !== undefined && result[0].finished === 1) {
+                                console.log(result[0]);
                                 response.sendCustomError(res, strings.errors.gameFinished, 403);
+                            } else {
+                                response.sendCustomError(res, strings.errors.gameNotFound, 403);
                             }
                         }
                     });

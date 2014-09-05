@@ -16,6 +16,10 @@ module.exports = {
 			message: 'Last game is not finished yet!', 
 			code: 'LAST_GAME_UNFINISHED_ERROR'
 		},
+		gameNotFound: {
+			message: 'Game could not be found on server!',
+			code: 'GAME_NOT_FOUND_ERROR'
+		},
 		drawForbidden: {
 			message: 'There is no draw foosball!', 
 			code: 'NO_DRAW_ALLOWED_ERROR'
