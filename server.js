@@ -3,6 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var strings = require('./api/strings.js');
+var Responses = require('./api/responses.js');
 var app = express();
 var connectionpool = mysql.createPool(config.mysql);
 
