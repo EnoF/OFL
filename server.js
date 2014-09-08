@@ -5,8 +5,8 @@ var mysql = require('mysql');
 var Games = require('./api/games.js');
 var Players = require('./api/players.js');
 
-var game = new Games();
-var player = new Players();
+var games = new Games();
+var players = new Players();
 var app = express();
 var connectionpool = mysql.createPool(config.mysql);
 
@@ -22,23 +22,23 @@ app.use(function(req, res, next) {
 });
 
 app.get('/players', function getPlayers(req, res) {
-    player.getPlayers(req, res, connectionpool);
+    players.getPlayers(req, res, connectionpool);
 });
 
 app.post('/players', function postPlayers(req, res) {
-    player.postPlayers(req, res, connectionpool);
+    players.postPlayers(req, res, connectionpool);
 });
 
 app.get('/games', function getGames(req, res) {
-    game.getGames(req, res, connectionpool);
+    games.getGames(req, res, connectionpool);
 });
 
 app.post('/games', function postGames(req, res) {
-    game.postGames(req, res, connectionpool);
+    games.postGames(req, res, connectionpool);
 });
 
 app.put('/games/:id', function putGames(req, res) {
-    game.putGames(req, res, connectionpool);
+    games.putGames(req, res, connectionpool);
 });
 
 app.listen(3000);
