@@ -69,7 +69,7 @@ module.exports = function Games() {
 	        }
 	    };
 	    var update = [];
-	    connectionpool.getConnection(function(err, connection) {
+	    connectionpool.getConnection(function (err, connection) {
 
 	        if (err) {
 	            response.sendError(res, err, 503);
@@ -78,27 +78,48 @@ module.exports = function Games() {
 	                if (err) {
 	                    response.sendError(res, err, 500);
 	                } else {
-	                    connection.query('SELECT finished FROM game WHERE id = ?;', req.params.id, function putGamesCheckUnfinished(err, result) {
-	                        if (err) {
-	                            connection.rollback(function(){
-	                                response.sendError(res, err, 500);
-	                            });
-	                        } else {
-	                            if (result[0] !== undefined && result[0].finished === 0) {
-	                                updateGame (connection, req, res, teams);
-	                            } else if (result[0] !== undefined && result[0].finished === 1) {
-	                                response.sendCustomError(res, strings.errors.gameFinished, 403);
-	                            } else {
-	                                response.sendCustomError(res, strings.errors.gameNotFound, 403);
-	                            }
-	                        }
-	                    });
-	                    connection.release();
+	                	selectFromGame(connection, req, res, deleteGame, teams);
 	                }
 	            });
 	        }
 	    });
 	};
+
+	this.deleteGames = function (req, res, connectionpool) {
+		connectionpool.getConnection(function (err, connection) {
+			if (err) {
+				response.sendError(res, err, 503);
+			} else {
+				connection.beginTransaction(function deleteGamesTransaction(err) {
+					if (err) {
+						response.sendError(res, err, 500);
+					} else {
+						selectFromGame(connection, req, res, deleteGame);
+					}
+				});
+			}
+		});
+
+	};
+
+	function selectFromGame(connection, req, res, callback, teams){
+		connection.query('SELECT finished FROM game WHERE id = ?;', req.params.id, function (err, result) {
+			if (err) {
+				connection.rollback(function () {
+					response.sendError(res, err, 500);
+				});
+			} else {
+				if (result[0] !== undefined && result[0].finished === 0) {
+                    callback(connection, req, res, teams);
+                } else if (result[0] !== undefined && result[0].finished === 1) {
+                    response.sendCustomError(res, strings.errors.gameFinished, 403);
+                } else {
+                    response.sendCustomError(res, strings.errors.gameNotFound, 403);
+                }
+			}
+		});
+		connection.release();
+	}
 
 	function createGame (connection, req, res, result) {
 	    if(result[0] !== undefined && result[0].count === 0) {
@@ -253,6 +274,27 @@ module.exports = function Games() {
 	            });
 	        }
 	    }
+	}
+
+	function deleteGame(connection, req, res) {
+		connection.query('DELETE FROM game WHERE id=?', req.params.id, function deleteGamesUpdateTable(err, result) {
+			if (err) {
+				connection.rollback(function () {
+					response.sendError(res, err, 500);
+				});
+			} else {
+				connection.commit(function (err) {
+					if (err) {
+						connection.rollback(function () {
+							response.sendError(res, err, 500);
+						});
+					}
+				});
+				var logInfo = strings.logging.playerDeleted + req.params.id;
+
+				response.sendSuccess(res, null, 204, logInfo);
+			}
+		});
 	}
 
 	function hasWon(goalsTeam1, goalsTeam2) {

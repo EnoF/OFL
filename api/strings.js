@@ -27,6 +27,7 @@ module.exports = {
 	},
 	logging : {
 		newPlayerCreated: 'INFO: New player has been created with ID ',
-		newGameCreated: 'INFO: New game has been created with ID '
+		newGameCreated: 'INFO: New game has been created with ID ',
+		playerDeleted: 'INFO: Player has been deleted. Affected ID was '
 	}
 }

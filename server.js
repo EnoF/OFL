@@ -41,5 +41,9 @@ app.put('/games/:id', function putGames(req, res) {
     games.putGames(req, res, connectionpool);
 });
 
+app.delete('/games/:id', function deleteGames(req, res) {
+	games.deleteGames(req, res, connectionpool);
+});
+
 app.listen(3000);
 console.log('API Fuck yeah!');
