@@ -42,7 +42,7 @@ app.put('/games/:id', function putGames(req, res) {
 });
 
 app.delete('/games/:id', function deleteGames(req, res) {
-	games.deleteGames(req, res, connectionpool);
+    games.deleteGames(req, res, connectionpool);
 });
 
 app.listen(3000);
