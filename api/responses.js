@@ -29,7 +29,7 @@ module.exports = function Responses() {
     };
 
     function logTimeBuilder() {
-        var d = new Date;
+        var d = new Date();
         return d.toISOString();
     }
 };

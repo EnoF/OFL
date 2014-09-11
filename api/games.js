@@ -167,29 +167,13 @@ module.exports = function Games() {
         if(teams.team1.won) {
             teams.team1.points = gain;
             teams.team2.points = -gain;
-            update.push(
-                'UPDATE player SET points=points+'+mysql.escape(teams.team1.points)
-                +', victories=victories+1 WHERE id='+mysql.escape(teams.team1.players[0])
-                +' OR id=' +mysql.escape(teams.team1.players[1])
-                +';');
-            update.push(
-                'UPDATE player SET points=points+'+mysql.escape(teams.team2.points)
-                +', defeats=defeats+1 WHERE id='+mysql.escape(teams.team2.players[0])
-                +' OR id='+mysql.escape(teams.team2.players[1])
-                +';');
+            update.push('UPDATE player SET points=points+'+mysql.escape(teams.team1.points)+', victories=victories+1 WHERE id='+mysql.escape(teams.team1.players[0])+' OR id=' +mysql.escape(teams.team1.players[1])+';');
+            update.push('UPDATE player SET points=points+'+mysql.escape(teams.team2.points)+', defeats=defeats+1 WHERE id='+mysql.escape(teams.team2.players[0])+' OR id='+mysql.escape(teams.team2.players[1])+';');
         } else {
             teams.team1.points = -gain;
             teams.team2.points = gain;
-            update.push(
-                'UPDATE player SET points=points+'+mysql.escape(teams.team1.points)
-                +', defeats=defeats+1 WHERE id='+mysql.escape(teams.team1.players[0])
-                +' OR id='+mysql.escape(teams.team1.players[1])
-                +';');
-            update.push(
-                'UPDATE player SET points=points+'+mysql.escape(teams.team2.points)
-                +', victories=victories+1 WHERE id='+mysql.escape(teams.team2.players[0])
-                +' OR id='+mysql.escape(teams.team2.players[1])
-                +';');
+            update.push('UPDATE player SET points=points+'+mysql.escape(teams.team1.points)+', defeats=defeats+1 WHERE id='+mysql.escape(teams.team1.players[0])+' OR id='+mysql.escape(teams.team1.players[1])+';');
+            update.push('UPDATE player SET points=points+'+mysql.escape(teams.team2.points)+', victories=victories+1 WHERE id='+mysql.escape(teams.team2.players[0])+' OR id='+mysql.escape(teams.team2.players[1])+';');
         }
     }
 
@@ -298,4 +282,4 @@ module.exports = function Games() {
     function hasWon(goalsTeam1, goalsTeam2) {
         return ((goalsTeam1 > goalsTeam2) ? true : false);
     }
-}
+};

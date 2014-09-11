@@ -30,4 +30,4 @@ module.exports = {
         newGameCreated: 'INFO: New game has been created with ID ',
         playerDeleted: 'INFO: Player has been deleted. Affected ID was '
     }
-}
+};

@@ -10,7 +10,7 @@ module.exports = function Players() {
             if (err) {
                 response.sendError(res, err, 503);
             } else {
-                connection.query('SELECT * FROM player;', function getPlayersResult(err, rows, fields) {
+                connection.query('SELECT * FROM player;', function getPlayersResult(err, rows) {
                     if (err) {
                         response.sendError(res, err, 500);
                     } else {
@@ -73,7 +73,7 @@ module.exports = function Players() {
                 }
             });
         } else {
-            response.sendCustomError(res, strings.errors.playerExists, 403)
+            response.sendCustomError(res, strings.errors.playerExists, 403);
         }
     }
-}
+};
