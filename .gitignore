@@ -1,3 +1,5 @@
 /config.js
 app/bower_components/
 node_modules/
+.idea/
+/tablesoccer.iml
