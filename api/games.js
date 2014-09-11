@@ -5,7 +5,6 @@ var Responses = require('./responses.js');
 var response = new Responses();
 
 module.exports = function Games() {
-
 	this.getGames = function (req, res, connectionpool) {
 	    connectionpool.getConnection(function(err, connection) {
 	        if (err) {

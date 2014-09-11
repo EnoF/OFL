@@ -2,22 +2,22 @@
     <div class="column large-12">
         <table width="100%">
             <thead>
-                <tr>
-                    <th width="50" data-ng-click="changeOrder('rank')">#</th>
-                    <th data-ng-click="changeOrder('name')">Name</th>
-                    <th width="150" data-ng-click="changeOrder('points')">Points</th>
-                    <th width="150" data-ng-click="changeOrder('wins')">Wins</th>
-                    <th width="150" data-ng-click="changeOrder('defeats')">Defeats</th>
-                </tr>
+            <tr>
+                <th width="50" data-ng-click="changeOrder('rank')">#</th>
+                <th data-ng-click="changeOrder('name')">Name</th>
+                <th width="150" data-ng-click="changeOrder('points')">Points</th>
+                <th width="150" data-ng-click="changeOrder('wins')">Wins</th>
+                <th width="150" data-ng-click="changeOrder('defeats')">Defeats</th>
+            </tr>
             </thead>
             <tbody>
-                <tr data-ng-repeat="player in players | orderBy: order : reverse">
-                    <td>{{ player.id }}</td>
-                    <td>{{ player.firstname }} {{ player.lastname }}</td>
-                    <td>{{ player.points}}</td>
-                    <td>{{ player.victories}}</td>
-                    <td>{{ player.defeats}}</td>
-                </tr>
+            <tr data-ng-repeat="player in players | orderBy: order : reverse">
+                <td>{{ player.id }}</td>
+                <td>{{ player.firstname }} {{ player.lastname }}</td>
+                <td>{{ player.points}}</td>
+                <td>{{ player.victories}}</td>
+                <td>{{ player.defeats}}</td>
+            </tr>
             </tbody>
         </table>
     </div>
