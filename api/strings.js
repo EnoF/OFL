@@ -25,9 +25,15 @@ module.exports = {
             code: 'NO_DRAW_ALLOWED_ERROR'
         }
     },
-    logging : {
+    logging: {
         newPlayerCreated: 'INFO: New player has been created with ID ',
         newGameCreated: 'INFO: New game has been created with ID ',
         playerDeleted: 'INFO: Player has been deleted. Affected ID was '
+    },
+    query: {
+        updatePlayerSetPoints: 'UPDATE player SET points=points+',
+        setVictoriesPlusOneWhereId: ', victories=victories+1 WHERE id=',
+        setDefeatesPlusOneWhereId: ', defeats=defeats+1 WHERE id=',
+        orWhereId: ' OR id='
     }
 };

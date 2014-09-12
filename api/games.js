@@ -67,6 +67,7 @@ module.exports = function Games() {
                 points: null
             }
         };
+        console.log(teams.team1.goals, ',', teams.team2.goals, teams.team1.won, teams.team2.won);
         var update = [];
         connectionpool.getConnection(function (err, connection) {
 
@@ -170,14 +171,19 @@ module.exports = function Games() {
         if(teams.team1.won) {
             teams.team1.points = gain;
             teams.team2.points = -gain;
-            update.push('UPDATE player SET points=points+'+mysql.escape(teams.team1.points)+', victories=victories+1 WHERE id='+mysql.escape(teams.team1.players[0])+' OR id=' +mysql.escape(teams.team1.players[1])+';');
-            update.push('UPDATE player SET points=points+'+mysql.escape(teams.team2.points)+', defeats=defeats+1 WHERE id='+mysql.escape(teams.team2.players[0])+' OR id='+mysql.escape(teams.team2.players[1])+';');
+            update.push(playerUpdateQueryBuilder (strings.query.setVictoriesPlusOneWhereId, teams.team1));
+            update.push(playerUpdateQueryBuilder (strings.query.setDefeatesPlusOneWhereId, teams.team2));
         } else {
             teams.team1.points = -gain;
             teams.team2.points = gain;
-            update.push('UPDATE player SET points=points+'+mysql.escape(teams.team1.points)+', defeats=defeats+1 WHERE id='+mysql.escape(teams.team1.players[0])+' OR id='+mysql.escape(teams.team1.players[1])+';');
-            update.push('UPDATE player SET points=points+'+mysql.escape(teams.team2.points)+', victories=victories+1 WHERE id='+mysql.escape(teams.team2.players[0])+' OR id='+mysql.escape(teams.team2.players[1])+';');
+            update.push(playerUpdateQueryBuilder (strings.query.setDefeatesPlusOneWhereId, teams.team1));
+            update.push(playerUpdateQueryBuilder (strings.query.setVictoriesPlusOneWhereId, teams.team2));
         }
+    }
+
+    function playerUpdateQueryBuilder (result, team) {
+        var query = strings.query;
+        return  query.updatePlayerSetPoints+mysql.escape(team.points)+result+mysql.escape(team.players[0])+query.orWhereId+mysql.escape(team.players[1])+';';
     }
 
     function updateGame (connection, req, res, teams) {
@@ -236,6 +242,7 @@ module.exports = function Games() {
         if (points.length===4) {
             var gain = calculateEloGain(points);
              createPlayerUpdateQuery (teams, gain, update);
+             console.log(update.join());
 
             if(update.length===2) {
             connection.query(update[0], function putGamesUpdateTeam1(err) {
@@ -272,8 +279,8 @@ module.exports = function Games() {
             connection.commit(function (err) {
                 if (err) {
                     connection.rollback(function () {
-                        response.sendError(res, err, 500);
                     });
+                    response.sendError(res, err, 500);
                 }
             });
             var logInfo = strings.logging.playerDeleted + req.params.id;
