@@ -77,7 +77,7 @@ module.exports = function Games() {
                     if (err) {
                         response.sendError(res, err, 500);
                     } else {
-                        selectFromGame(connection, req, res, deleteGame, teams);
+                        selectFromGame(connection, req, res, updateGame, teams);
                     }
                 });
             }
@@ -151,19 +151,22 @@ module.exports = function Games() {
         }
     }
 
-    function createQueryPlayerUpdate (points, teams, update) {
+    function calculateEloGain (points) {
         var pointsTeam1 = points[0]+points[1];
         var pointsTeam2 = points[2]+points[3];
         var eloMax = 400;
+        var difference = 0;
         if (Math.abs(pointsTeam1-pointsTeam2) > eloMax){
-            var difference = eloMax;
+            difference = eloMax;
         } else if (Math.abs(pointsTeam1-pointsTeam2) < -eloMax) {
-            var difference = -eloMax;
+            difference = -eloMax;
         } else {
-            var difference = Math.abs(pointsTeam1-pointsTeam2);
+            difference = Math.abs(pointsTeam1-pointsTeam2);
         }
-        var gain = Math.round((1/(1+Math.pow(10,difference/eloMax)))*10);
+        return Math.round((1/(1+Math.pow(10,difference/eloMax)))*10);
+    }
 
+    function createPlayerUpdateQuery (teams, gain, update) {
         if(teams.team1.won) {
             teams.team1.points = gain;
             teams.team2.points = -gain;
@@ -231,7 +234,8 @@ module.exports = function Games() {
 
     function updatePlayersQuery(connection, res, teams, points, update) {
         if (points.length===4) {
-            createQueryPlayerUpdate(points, teams, update);
+            var gain = calculateEloGain(points);
+             createPlayerUpdateQuery (teams, gain, update);
 
             if(update.length===2) {
             connection.query(update[0], function putGamesUpdateTeam1(err) {
@@ -259,7 +263,7 @@ module.exports = function Games() {
     }
 
     function deleteGame(connection, req, res) {
-    connection.query('DELETE FROM game WHERE id=?', req.params.id, function deleteGamesUpdateTable(err, result) {
+    connection.query('DELETE FROM game WHERE id=?', req.params.id, function deleteGamesUpdateTable(err) {
         if (err) {
             connection.rollback(function () {
                 response.sendError(res, err, 500);
