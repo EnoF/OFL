@@ -67,7 +67,7 @@ module.exports = function Games() {
                 points: null
             }
         };
-        console.log(teams.team1.goals, ',', teams.team2.goals, teams.team1.won, teams.team2.won);
+        console.log(req.body.team1.goals, ':', req.body.team2.goals, teams.team1.won, teams.team2.won);
         var update = [];
         connectionpool.getConnection(function (err, connection) {
 
@@ -290,7 +290,7 @@ module.exports = function Games() {
     });
     }
 
-    function hasWon(goalsTeam1, goalsTeam2) {
-        return ((goalsTeam1 > goalsTeam2) ? true : false);
+    function hasWon(self, opponent) {
+        return self > opponent;
     }
 };
