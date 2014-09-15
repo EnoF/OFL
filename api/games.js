@@ -67,7 +67,6 @@ module.exports = function Games() {
                 points: null
             }
         };
-        console.log(req.body.team1.goals, ':', req.body.team2.goals, teams.team1.won, teams.team2.won);
         var update = [];
         connectionpool.getConnection(function (err, connection) {
 
@@ -242,7 +241,6 @@ module.exports = function Games() {
         if (points.length===4) {
             var gain = calculateEloGain(points);
              createPlayerUpdateQuery (teams, gain, update);
-             console.log(update.join());
 
             if(update.length===2) {
             connection.query(update[0], function putGamesUpdateTeam1(err) {
@@ -291,6 +289,6 @@ module.exports = function Games() {
     }
 
     function hasWon(self, opponent) {
-        return self > opponent;
+        return parseInt(self, 10) > parseInt(opponent, 10);
     }
 };
