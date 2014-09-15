@@ -23,6 +23,10 @@ module.exports = {
         drawForbidden: {
             message: 'There is no draw foosball!', 
             code: 'NO_DRAW_ALLOWED_ERROR'
+        },
+        updateBuilderFailed: {
+            message: 'Failed to build update query to update player stats!',
+            code: 'CREATE_UPDATE_QUERY_ERROR'
         }
     },
     logging: {

@@ -10,7 +10,7 @@ module.exports = function Games() {
             if (err) {
                 response.sendError(res, err, 503);
             } else {
-                connection.query('SELECT * FROM game;', function getGamesResult(err, rows, fields) {
+                connection.query('SELECT * FROM game;', function getGamesResult(err, rows) {
                     if (err) {
                         response.sendError(res, err, 500);
                     } else {
@@ -67,7 +67,6 @@ module.exports = function Games() {
                 points: null
             }
         };
-        var update = [];
         connectionpool.getConnection(function (err, connection) {
 
             if (err) {
@@ -243,25 +242,25 @@ module.exports = function Games() {
              createPlayerUpdateQuery (teams, gain, update);
 
             if(update.length===2) {
-            connection.query(update[0], function putGamesUpdateTeam1(err) {
-                if(!err){
-                    connection.query(update[1], function putGamesUpdateTeam2(err) {
-                        if(!err){
-                            connection.commit(function (err) {
-                                if (err) {
-                                    connection.rollback(function() {
-                                       response.sendError(res, err, 500);
-                                    });
-                                }
-                            });
-                            response.sendSuccess(res, { result: 'success' }, 200, null);
-                        }
-                    });
-                }
-            });
+                connection.query(update[0], function putGamesUpdateTeam1(err) {
+                    if(!err){
+                        connection.query(update[1], function putGamesUpdateTeam2(err) {
+                            if(!err){
+                                connection.commit(function (err) {
+                                    if (err) {
+                                        connection.rollback(function() {
+                                           response.sendError(res, err, 500);
+                                        });
+                                    }
+                                });
+                                response.sendSuccess(res, { result: 'success' }, 200, null);
+                            }
+                        });
+                    }
+                });
             } else {
                 connection.rollback(function(){
-                    response.sendError(res, err, 500);
+                    response.sendCustomError(res, strings.errors.updateBuilderFailed, 500);
                 });
             }
         }
