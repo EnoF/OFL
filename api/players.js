@@ -7,14 +7,8 @@ var basicQuerys = new BasicQuerys();
 
 module.exports = function Players() {
 
-    this.getPlayers = function (req, res, connectionpool) {
-        connectionpool.getConnection(function(err, connection) {
-            if (err) {
-                response.sendError(res, err, 503);
-            } else {
-                basicQuerys.selectFromTable(connection, res, strings.dbTables.players);
-            }
-        });
+    this.getPlayers = function (res, connectionpool) {
+        basicQuerys.selectFromTable(connectionpool, res, strings.dbTables.players);
     };
 
     this.postPlayers = function (req, res, connectionpool) {

@@ -42,6 +42,6 @@ module.exports = {
     },
     dbTables: {
         games: 'game',
-        palyers: 'player'
+        players: 'player'
     }
 };

@@ -7,14 +7,8 @@ var response = new Responses();
 var basicQuerys = new BasicQuerys();
 
 module.exports = function Games() {
-    this.getGames = function (req, res, connectionpool) {
-        connectionpool.getConnection(function(err, connection) {
-            if (err) {
-                response.sendError(res, err, 503);
-            } else {
-                basicQuerys.selectFromTable(connection, res, strings.dbTables.games);
-            }
-        });
+    this.getGames = function (res, connectionpool) {
+        basicQuerys.selectFromTable(connectionpool, res, strings.dbTables.games);
     };
 
     this.postGames = function (req, res, connectionpool) {

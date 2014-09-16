@@ -22,7 +22,7 @@ app.use(function(req, res, next) {
 });
 
 app.get('/players', function getPlayers(req, res) {
-    players.getPlayers(req, res, connectionpool);
+    players.getPlayers(res, connectionpool);
 });
 
 app.post('/players', function postPlayers(req, res) {
@@ -30,7 +30,7 @@ app.post('/players', function postPlayers(req, res) {
 });
 
 app.get('/games', function getGames(req, res) {
-    games.getGames(req, res, connectionpool);
+    games.getGames(res, connectionpool);
 });
 
 app.post('/games', function postGames(req, res) {
