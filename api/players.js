@@ -1,7 +1,9 @@
 var strings = require('./strings.js');
 var Responses = require('./responses.js');
+var BasicQuerys = require('./basicQuerys.js');
 
 var response = new Responses();
+var basicQuerys = new BasicQuerys();
 
 module.exports = function Players() {
 
@@ -10,15 +12,7 @@ module.exports = function Players() {
             if (err) {
                 response.sendError(res, err, 503);
             } else {
-                connection.query('SELECT * FROM player;', function getPlayersResult(err, rows) {
-                    if (err) {
-                        response.sendError(res, err, 500);
-                    } else {
-                        response.sendSuccess(res, { players: rows }, 200, null);
-                    }
-                    connection.release();
-                });
-
+                basicQuerys.selectFromTable(connection, res, strings.dbTables.players);
             }
         });
     };

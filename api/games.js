@@ -1,8 +1,10 @@
 var mysql = require('mysql');
 var strings = require('./strings.js');
 var Responses = require('./responses.js');
+var BasicQuerys = require('./basicQuerys.js');
 
 var response = new Responses();
+var basicQuerys = new BasicQuerys();
 
 module.exports = function Games() {
     this.getGames = function (req, res, connectionpool) {
@@ -10,15 +12,7 @@ module.exports = function Games() {
             if (err) {
                 response.sendError(res, err, 503);
             } else {
-                connection.query('SELECT * FROM game;', function getGamesResult(err, rows) {
-                    if (err) {
-                        response.sendError(res, err, 500);
-                    } else {
-                        response.sendSuccess(res, { games: rows }, 200, null);
-                    }
-
-                    connection.release();
-                });
+                basicQuerys.selectFromTable(connection, res, strings.dbTables.games);
             }
         });
     };

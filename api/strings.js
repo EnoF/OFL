@@ -39,5 +39,9 @@ module.exports = {
         setVictoriesPlusOneWhereId: ', victories=victories+1 WHERE id=',
         setDefeatesPlusOneWhereId: ', defeats=defeats+1 WHERE id=',
         orWhereId: ' OR id='
+    },
+    dbTables: {
+        games: 'game',
+        palyers: 'player'
     }
 };
