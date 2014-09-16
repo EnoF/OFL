@@ -42,24 +42,7 @@ module.exports = function Players() {
 
     function createPlayer(connection, post, res, result) {
         if(result[0] !== undefined && result[0].count === 0) {
-            connection.query('INSERT INTO player SET ?;', post, function postPlayersResult(err, result) {
-                if (err) {
-                    connection.rollback(function(){
-                        response.sendError(res, err, 500);
-                    });
-                } else {
-                    connection.commit(function (err) {
-                        if (err) {
-                            connection.rollback(function() {
-                               response.sendError(res, err, 500);
-                            });
-                        } else {
-                            var logInfo = strings.logging.newPlayerCreated + result.insertId;
-                            response.sendSuccess(res, { id: result.insertId }, 201, logInfo);
-                        }
-                    });
-                }
-            });
+            basicQuerys.insertIntoTable(connection, res, strings.dbTables.players, post);
         } else {
             response.sendCustomError(res, strings.errors.playerExists, 403);
         }

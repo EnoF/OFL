@@ -114,25 +114,25 @@ module.exports = function Games() {
                 team2_player1: req.body.team2[0].id,
                 team2_player2: req.body.team2[1].id
             };
-            connection.query('INSERT INTO game SET ?;', post, function postGamesResult(err, result) {
-                if (err) {
-                    connection.rollback(function(){
-                       response.sendError(res, err, 500); 
-                    });
-                } else {
-                    connection.commit(function(err){
-                        if(err){
-                            connection.rollback(function (){
-                                response.sendError(res, err, 500);
-                            });
-                        } else {
-                            var logInfo = strings.logging.newGameCreated + result.insertId;
-                            response.sendSuccess(res, { id: result.insertId }, 201, logInfo);
-                        }
-                    });
-                }
-                
-            });
+            basicQuerys.insertIntoTable(connection, res, strings.dbTables.games, post);
+            // connection.query('INSERT INTO game SET ?;', post, function postGamesResult(err, result) {
+            //     if (err) {
+            //         connection.rollback(function(){
+            //            response.sendError(res, err, 500); 
+            //         });
+            //     } else {
+            //         connection.commit(function(err){
+            //             if(err){
+            //                 connection.rollback(function (){
+            //                     response.sendError(res, err, 500);
+            //                 });
+            //             } else {
+            //                 var logInfo = strings.logging.newGameCreated + result.insertId;
+            //                 response.sendSuccess(res, { id: result.insertId }, 201, logInfo);
+            //             }
+            //         });
+            //     }  
+            // });
         } else {
             response.sendCustomError(res, strings.errors.gameUnfinished, 403);
         }
