@@ -15,7 +15,7 @@ module.exports = function BasicQuerys() {
                     } else {
                         var responseBody = {};
                         responseBody[table] = rows;
-                        response.sendSuccess(res, responseBody, 200, null);
+                        response.sendSuccess(res, rows, 200, null);
                     }
                     connection.release();
                 });
