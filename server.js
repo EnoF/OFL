@@ -46,4 +46,4 @@ app.delete('/games/:id', function deleteGames(req, res) {
 });
 
 app.listen(3000);
-console.log('API Fuck yeah!');
+console.log('API running on Port 3000');

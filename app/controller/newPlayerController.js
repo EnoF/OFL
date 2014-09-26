@@ -6,8 +6,8 @@
     app.controller('newPlayerController', function($scope, Restangular) {
 
         $scope.player = {
-            id: null,
-            name: null
+            firstname: null,
+            lastname: null
         };
 
         $scope.save = function save(player) {

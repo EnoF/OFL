@@ -43,7 +43,13 @@ module.exports = function(grunt) {
     // Creates the `server` task
     grunt.registerTask('server', [
         'express',
+        'node',
         'open',
         'watch'
     ]);
+
+    grunt.registerTask('node', function() {
+        grunt.log.writeln('Starting REST API');
+        require('./server.js');
+    });
 };
