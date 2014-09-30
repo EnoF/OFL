@@ -4,12 +4,19 @@
     var app = angular.module('jtfl');
 
     app.controller('newGameController', function($scope, Restangular) {
-        $scope.people = [
-            {name: "Dominik", id: 1},
-            {name: "Stefan", id: 2},
-            {name: "Lukas", id: 3},
-            {name: "Benny", id: 4}
-        ];
+
+
+        $scope.players = [];
+
+        Restangular.all('players').getList()
+        .then(function(players) {
+            players.map(function(player) {
+                player.fullName = player.firstname + ' ' + player.lastname;
+            })
+            $scope.players = players;
+        }, function(err) {
+            console.log('dafuq',err)
+        });
 
         $scope.matchStarted = false;
         $scope.startMatch = function startMatch() {
